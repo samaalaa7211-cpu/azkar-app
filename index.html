@@ -1,1 +1,261 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تطبيق أذكاري الكيوت ✨</title>
+    <style>
+        :root {
+            --main-pink: #ff85a2;
+            --light-pink: #fbb1bd;
+            --soft-pink: #ffdae0;
+            --white: #ffffff;
+            --text-color: #5e3038;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--soft-pink);
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            color: var(--text-color);
+        }
+
+        .app-container {
+            width: 90%;
+            max-width: 400px;
+            background: var(--white);
+            border-radius: 30px;
+            box-shadow: 0 10px 25px rgba(255, 133, 162, 0.3);
+            overflow: hidden;
+            position: relative;
+            min-height: 600px;
+        }
+
+        /* الهيدر */
+        .header {
+            background-color: var(--main-pink);
+            color: white;
+            padding: 20px;
+            text-align: center;
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        /* الصفحات */
+        .page {
+            display: none;
+            padding: 20px;
+            animation: slideIn 0.4s ease-out;
+        }
+
+        .active { display: block; }
+
+        @keyframes slideIn {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        /* الأزرار الكبيرة في الواجهة */
+        .main-menu, .azkar-menu {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-top: 50px;
+        }
+
+        .btn-large {
+            background-color: var(--light-pink);
+            border: none;
+            padding: 20px;
+            border-radius: 20px;
+            color: white;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: 0.3s;
+            box-shadow: 0 5px 15px rgba(255, 177, 189, 0.4);
+        }
+
+        .btn-large:hover { transform: scale(1.05); background-color: var(--main-pink); }
+
+        /* السبحة */
+        .subha-container {
+            text-align: center;
+            margin-top: 30px;
+        }
+
+        .zekr-display {
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: var(--main-pink);
+            margin-bottom: 20px;
+            min-height: 60px;
+        }
+
+        .counter-circle {
+            width: 180px;
+            height: 180px;
+            background: var(--main-pink);
+            border-radius: 50%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            margin: 0 auto;
+            color: white;
+            cursor: pointer;
+            border: 8px solid var(--soft-pink);
+            box-shadow: 0 8px 20px rgba(255, 133, 162, 0.4);
+        }
+
+        .counter-circle span { font-size: 3rem; font-weight: bold; }
+
+        .subha-controls {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 50px;
+        }
+
+        .control-btn {
+            background: var(--light-pink);
+            border: none;
+            padding: 10px 15px;
+            border-radius: 12px;
+            color: white;
+            cursor: pointer;
+        }
+
+        /* قائمة الأذكار */
+        .zekr-item {
+            background: var(--soft-pink);
+            padding: 15px;
+            border-radius: 15px;
+            margin-bottom: 10px;
+            line-height: 1.6;
+            border-right: 5px solid var(--main-pink);
+        }
+
+        .back-btn {
+            background: none;
+            border: 1px solid var(--main-pink);
+            color: var(--main-pink);
+            padding: 5px 15px;
+            border-radius: 10px;
+            cursor: pointer;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="app-container">
+    <div class="header" id="header-title">أذكاري الكيوت ✨</div>
+
+    <div id="home" class="page active">
+        <div class="main-menu">
+            <button class="btn-large" onclick="showPage('azkar-categories')">🌸 أذكار</button>
+            <button class="btn-large" onclick="showPage('subha-page')">📿 تسبيح</button>
+        </div>
+    </div>
+
+    <div id="azkar-categories" class="page">
+        <button class="back-btn" onclick="showPage('home')">⬅ رجوع</button>
+        <div class="azkar-menu">
+            <button class="btn-large" onclick="showAzkar('صباح')">☀️ أذكار الصباح</button>
+            <button class="btn-large" onclick="showAzkar('مساء')">🌙 أذكار المساء</button>
+            <button class="btn-large" onclick="showAzkar('نوم')">🛌 أذكار النوم</button>
+            <button class="btn-large" onclick="showAzkar('صلاة')">🕌 أذكار الصلاة</button>
+        </div>
+    </div>
+
+    <div id="azkar-display-page" class="page">
+        <button class="back-btn" onclick="showPage('azkar-categories')">⬅ رجوع</button>
+        <div id="azkar-list"></div>
+    </div>
+
+    <div id="subha-page" class="page">
+        <button class="back-btn" onclick="showPage('home')">⬅ رجوع</button>
+        <div class="subha-container">
+            <div id="current-zekr" class="zekr-display">سبحان الله</div>
+            <div class="counter-circle" onclick="incrementCounter()">
+                <span>تسبيح</span>
+                <div id="counter-num">0</div>
+            </div>
+            <div class="subha-controls">
+                <button class="control-btn" onclick="changeZekr()">🔄 تغيير الذكر</button>
+                <button class="control-btn" onclick="addCustomZekr()">➕ إضافة ذكر</button>
+            </div>
+            <button class="control-btn" style="margin-top: 20px;" onclick="resetCounter()">🔄 صفر العداد</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // بيانات الأذكار
+    const azkarData = {
+        'صباح': ["أصبحنا وأصبح الملك لله", "آية الكرسي", "اللهم بك أصبحنا وبك أمسينا", "يا حي يا قيوم برحمتك أستغيث"],
+        'مساء': ["أمسينا وأمسى الملك لله", "اللهم بك أمسينا وبك أصبحنا", "بسم الله الذي لا يضر مع اسمه شيء"],
+        'نوم': ["باسمك ربي وضعت جنبي", "اللهم قني عذابك يوم تبعث عبادك", "سورة الإخلاص والمعوذتين"],
+        'صلاة': ["أستغفر الله (3 مرات)", "اللهم أنت السلام ومنك السلام", "سبحان الله (33)، الحمد لله (33)، الله أكبر (33)"]
+    };
+
+    let subhaZekrList = ["سبحان الله", "لا إله إلا الله", "الله أكبر", "الحمدلله", "سبحان الله وبحمده", "سبحان الله العظيم", "ربي اهدني فيمن هديت وعافني فيمن عافيت"];
+    let currentZekrIndex = 0;
+    let count = 0;
+
+    function showPage(pageId) {
+        document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+        document.getElementById(pageId).classList.add('active');
+        
+        // تغيير العنوان حسب الصفحة
+        const titles = {'home': 'أذكاري الكيوت ✨', 'azkar-categories': 'اختر نوع الذكر 🌸', 'subha-page': 'السبحة الإلكترونية 📿'};
+        if(titles[pageId]) document.getElementById('header-title').innerText = titles[pageId];
+    }
+
+    function showAzkar(type) {
+        const listDiv = document.getElementById('azkar-list');
+        listDiv.innerHTML = '';
+        document.getElementById('header-title').innerText = "أذكار " + type;
+        
+        azkarData[type].forEach(item => {
+            const div = document.createElement('div');
+            div.className = 'zekr-item';
+            div.innerText = item;
+            listDiv.appendChild(div);
+        });
+        showPage('azkar-display-page');
+    }
+
+    function incrementCounter() {
+        count++;
+        document.getElementById('counter-num').innerText = count;
+        // اهتزاز بسيط عند الضغط (للموبايل)
+        if (navigator.vibrate) navigator.vibrate(50);
+    }
+
+    function resetCounter() {
+        count = 0;
+        document.getElementById('counter-num').innerText = count;
+    }
+
+    function changeZekr() {
+        currentZekrIndex = (currentZekrIndex + 1) % subhaZekrList.length;
+        document.getElementById('current-zekr').innerText = subhaZekrList[currentZekrIndex];
+        resetCounter();
+    }
+
+    function addCustomZekr() {
+        const newZekr = prompt("اكتبي الذكر الجديد اللي عايزة تضيفيه:");
+        if (newZekr) {
+            subhaZekrList.push(newZekr);
+            alert("تمت إضافة الذكر بنجاح! تقدري تلاقيه في تغيير الذكر.");
+        }
+    }
+</script>
+
+</body>
+</html>
 
