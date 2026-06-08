@@ -1,343 +1,253 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>اين انت الان؟</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            text-align: center;
-            background-color: #121212;
-            color: #ffffff;
-            padding: 20px;
-            margin: 0;
-        }
-        /* تصميم زر ضخم يسهل على الكفيف لمسه في أي مكان بالشاشة */
-        .main-btn {
-            width: 80%;
-            max-width: 300px;
-            height: 150px;
-            font-size: 24px;
-            font-weight: bold;
-            background-color: #007bff;
-            color: white;
-            border: none;
-            border-radius: 20px;
-            margin: 40px auto;
-            display: block;
-            cursor: pointer;
-            box-shadow: 0 8px 15px rgba(0,123,255,0.3);
-        }
-        .main-btn:active {
-            background-color: #0056b3;
-        }
-        #status {
-            font-size: 18px;
-            margin-top: 20px;
-            color: #bb86fc;
-        }
-        #places-list {
-            list-style: none;
-            padding: 0;
-            font-size: 20px;
-        }
-        #places-list li {
-            background: #1e1e1e;
-            margin: 10px 0;
-            padding: 15px;
-            border-radius: 10px;
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>المصحف الشريف</title>
+
+<style>
+:root{
+    --main:#1f7a5c;
+    --bg:#f5f6fa;
+    --card:#ffffff;
+    --text:#000;
+}
+
+body.dark{
+    --bg:#0b1220;
+    --card:#111a2e;
+    --text:#fff;
+}
+
+body{
+    margin:0;
+    font-family:Arial;
+    background:var(--bg);
+    color:var(--text);
+}
+
+/* Header */
+header{
+    background:var(--main);
+    color:white;
+    padding:15px;
+    text-align:center;
+}
+
+/* Pages */
+.page{display:none;padding:15px;}
+.active{display:block;}
+
+/* Cards */
+.card{
+    background:var(--card);
+    padding:15px;
+    margin:10px 0;
+    border-radius:12px;
+    box-shadow:0 2px 10px rgba(0,0,0,0.1);
+    cursor:pointer;
+}
+
+/* Inputs */
+input{
+    width:100%;
+    padding:10px;
+    margin:5px 0;
+    border-radius:8px;
+}
+
+/* Buttons */
+button{
+    background:var(--main);
+    color:white;
+    border:none;
+    padding:10px;
+    border-radius:8px;
+    margin:5px 0;
+    width:100%;
+    cursor:pointer;
+}
+
+/* Counter */
+.counter{
+    font-size:45px;
+    text-align:center;
+}
+
+/* Surah */
+.ayah{
+    padding:10px;
+    margin:5px 0;
+    background:var(--card);
+    border-radius:8px;
+}
+</style>
 </head>
+
 <body>
 
-    <h1>اين انت الان؟</h1>
-    <p>اضغط في أي مكان على الزر الأزرق للتحدث مع التطبيق</p>
+<header>📖 المصحف الشريف - تطبيق احترافي</header>
 
-    <button class="main-btn" onclick="startListening()">إضغط للتحدث</button>
+<!-- HOME -->
+<div id="home" class="page active">
+    <div class="card" onclick="openQuran()">📖 القرآن الكريم</div>
+    <div class="card" onclick="openTasbeeh()">📿 التسبيح</div>
+    <div class="card" onclick="openPlan()">📅 خطة يومية للقرآن</div>
 
-    <div id="status">حالة التطبيق: جاهز للاستخدام</div>
-    
-    <ul id="places-list">
-        </ul>
+    <button onclick="toggleDark()">🌙 وضع ليلي</button>
+</div>
 
-    <script>
-        // إعدادات تحويل النص إلى صوت (ليتحدث التطبيق مع المستخدم)
-        function speak(text) {
-            const utterance = new SpeechSynthesisUtterance(text);
-            utterance.lang = 'ar-SA'; // النطق باللغة العربية
-            window.speechSynthesis.speak(utterance);
-        }
+<!-- QURAN -->
+<div id="quran" class="page">
+    <h3>القرآن الكريم</h3>
 
-        // ترحيب تلقائي عند فتح التطبيق وشرح طريقة الاستخدام
-        window.onload = function() {
-            setTimeout(() => {
-                speak("أهلاً بك في مساعد الطريق. اضغط على الزر في منتصف الشاشة وتحدث معي، يمكنك أن تسألني: أين أنا؟ أو ما هي الأماكن القريبة؟");
-            }, 1000);
-        };
+    <input id="search" placeholder="ابحث عن سورة أو آية">
+    <button onclick="searchQuran()">بحث</button>
 
-        // إعدادات التعرف على الصوت (ليستمع التطبيق للمستخدم)
-        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-        
-        if (!SpeechRecognition) {
-            alert("عذراً، متصفحك لا يدعم خاصية التعرف على الصوت.");
-        }
+    <div id="result"></div>
 
-        const recognition = new SpeechRecognition();
-        recognition.lang = 'ar-SA'; // استماع باللغة العربية
-        recognition.interimResults = false;
+    <button onclick="backHome()">رجوع</button>
+</div>
 
-        function startListening() {
-            recognition.start();
-            document.getElementById('status').innerText = "جاري الاستماع إليك...";
-            speak("أنا أستمع إليك الآن");
-        }
+<!-- SURAH PAGE -->
+<div id="surahPage" class="page">
+    <h3 id="surahTitle"></h3>
+    <div id="ayahs"></div>
 
-        // معالجة الكلام الذي قاله المستخدم
-        recognition.onresult = function(event) {
-            const userCommand = event.results[0][0].transcript;
-            document.getElementById('status').innerText = "قلتَ: " + userCommand;
-            
-            handleUserCommand(userCommand);
-        };
+    <h4>📚 التفسير</h4>
+    <div id="tafsir"></div>
 
-        recognition.onerror = function() {
-            document.getElementById('status').innerText = "خطأ في التعرف على الصوت.";
-            speak("عذراً، لم أسمعك جيداً. يرجى المحاولة مرة أخرى.");
-        };
+    <audio id="audio" controls style="width:100%"></audio>
 
-        // تحليل ذكاء التطبيق للرد على الكلمات المفتاحية
-        function handleUserCommand(command) {
-            if (command.includes("أين أنا") || command.includes("مكان") || command.includes("موقعي")) {
-                getLocation();
-            } else if (command.includes("الأماكن القريبة") || command.includes("أماكن قريبة") || command.includes("قريب مني")) {
-                findNearbyPlaces();
-            } else {
-                speak("فهمت أنك تقول " + command + ". ولكن يمكنك سؤالي عن موقعك أو الأماكن القريبة فقط حالياً.");
-            }
-        }
+    <button onclick="backQuran()">رجوع</button>
+</div>
 
-        // وظيفة تحديد الموقع الجغرافي الحالي للمستخدم
-        function getLocation() {
-            if (navigator.geolocation) {
-                document.getElementById('status').innerText = "جاري تحديد موقعك الجغرافي...";
-                navigator.geolocation.getCurrentPosition(function(position) {
-                    const lat = position.coords.latitude;
-                    const lon = position.coords.longitude;
-                    
-                    // تنبيه: في التطبيق الحقيقي نقوم بإرسال هذه الإحداثيات لـ Google Maps لمعرفة اسم الشارع
-                    const reply = "تم تحديد موقعك بنجاح. أنت الآن في منطقة آمنة، وإحداثياتك هي خط عرض " + lat.toFixed(2) + " وخط طول " + lon.toFixed(2);
-                    speak(reply);
-                    document.getElementById('status').innerText = "تم تحديد الموقع.";
-                }, function() {
-                    speak("عذراً، فشلت في تحديد موقعك. تأكد من تفعيل خدمة تحديد الموقع في هاتفك.");
-                });
-            } else {
-                speak("عذراً، جهازك لا يدعم خاصية تحديد الموقع.");
-            }
-        }
+<!-- TASBEEH -->
+<div id="tasbeeh" class="page">
+    <h3>التسبيح</h3>
 
-        // وظيفة محاكاة الأماكن القريبة (تطبيق افتراضي)
-        function findNearbyPlaces() {
-            document.getElementById('status').innerText = "جاري البحث عن الأماكن القريبة...";
-            
-            // في التطبيقات المتقدمة نستخدم (Google Places API) لجلب الأماكن الحقيقية، هنا وضعنا أماكن افتراضية للشرح:
-            const places = [
-                "صيدلية الشفاء على بعد خمسين متراً",
-                "سوبر ماركت الأمانة على بعد مئة متر",
-                "مستشفى الأمل على بعد ربع كيلومتر"
-            ];
+    <div class="counter" id="count">0</div>
 
-            // تفريغ القائمة القديمة
-            const listContainer = document.getElementById('places-list');
-            listContainer.innerHTML = "";
+    <input id="dhikr" placeholder="الذكر">
 
-            // نطق الأماكن وعرضها
-            speak("الأماكن القريبة منك هي:");
-            
-            places.forEach((place, index) => {
-                setTimeout(() => {
-                    // إضافة المكان للقائمة بصرياً
-                    const li = document.createElement('li');
-                    li.innerText = place;
-                    listContainer.appendChild(li);
-                    // نطق المكان
-                    speak(place);
-                }, index * 2500); // فاصل زمني بين كل جملة وجملة لكي لا تتداخل الأصوات
-            });
-        }
-    </script>
-</body>
-</html>
-<html lang="ar" dir="rtl">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>مساعد الطريق الذكي</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            text-align: center;
-            background-color: #121212;
-            color: #ffffff;
-            padding: 20px;
-            margin: 0;
-        }
-        /* تصميم زر ضخم يسهل على الكفيف لمسه في أي مكان بالشاشة */
-        .main-btn {
-            width: 80%;
-            max-width: 300px;
-            height: 150px;
-            font-size: 24px;
-            font-weight: bold;
-            background-color: #007bff;
-            color: white;
-            border: none;
-            border-radius: 20px;
-            margin: 40px auto;
-            display: block;
-            cursor: pointer;
-            box-shadow: 0 8px 15px rgba(0,123,255,0.3);
-        }
-        .main-btn:active {
-            background-color: #0056b3;
-        }
-        #status {
-            font-size: 18px;
-            margin-top: 20px;
-            color: #bb86fc;
-        }
-        #places-list {
-            list-style: none;
-            padding: 0;
-            font-size: 20px;
-        }
-        #places-list li {
-            background: #1e1e1e;
-            margin: 10px 0;
-            padding: 15px;
-            border-radius: 10px;
-        }
-    </style>
-</head>
-<body>
+    <button onclick="plus()">➕</button>
+    <button onclick="reset()">🔄 تصفير</button>
 
-    <h1>مساعد الطريق الكفيف</h1>
-    <p>اضغط في أي مكان على الزر الأزرق للتحدث مع التطبيق</p>
+    <button onclick="backHome()">رجوع</button>
+</div>
 
-    <button class="main-btn" onclick="startListening()">إضغط للتحدث</button>
+<!-- PLAN -->
+<div id="plan" class="page">
+    <h3>📅 خطة يومية للقرآن</h3>
 
-    <div id="status">حالة التطبيق: جاهز للاستخدام</div>
-    
-    <ul id="places-list">
-        </ul>
+    <div class="card">
+        📌 اقرأ 4 صفحات يوميًا = ختمة كل شهر  
+    </div>
 
-    <script>
-        // إعدادات تحويل النص إلى صوت (ليتحدث التطبيق مع المستخدم)
-        function speak(text) {
-            const utterance = new SpeechSynthesisUtterance(text);
-            utterance.lang = 'ar-SA'; // النطق باللغة العربية
-            window.speechSynthesis.speak(utterance);
-        }
+    <div class="card">
+        📌 اقرأ بعد الفجر 10 دقائق (أفضل وقت للحفظ)
+    </div>
 
-        // ترحيب تلقائي عند فتح التطبيق وشرح طريقة الاستخدام
-        window.onload = function() {
-            setTimeout(() => {
-                speak("أهلاً بك في مساعد الطريق. اضغط على الزر في منتصف الشاشة وتحدث معي، يمكنك أن تسألني: أين أنا؟ أو ما هي الأماكن القريبة؟");
-            }, 1000);
-        };
+    <div class="card">
+        📌 راجع ما حفظته يوميًا قبل النوم
+    </div>
 
-        // إعدادات التعرف على الصوت (ليستمع التطبيق للمستخدم)
-        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-        
-        if (!SpeechRecognition) {
-            alert("عذراً، متصفحك لا يدعم خاصية التعرف على الصوت.");
-        }
+    <div class="card">
+        📌 يوم الجمعة: مراجعة أسبوعية
+    </div>
 
-        const recognition = new SpeechRecognition();
-        recognition.lang = 'ar-SA'; // استماع باللغة العربية
-        recognition.interimResults = false;
+    <button onclick="backHome()">رجوع</button>
+</div>
 
-        function startListening() {
-            recognition.start();
-            document.getElementById('status').innerText = "جاري الاستماع إليك...";
-            speak("أنا أستمع إليك الآن");
-        }
+<script>
 
-        // معالجة الكلام الذي قاله المستخدم
-        recognition.onresult = function(event) {
-            const userCommand = event.results[0][0].transcript;
-            document.getElementById('status').innerText = "قلتَ: " + userCommand;
-            
-            handleUserCommand(userCommand);
-        };
+let allSurahs=[];
+let count=0;
 
-        recognition.onerror = function() {
-            document.getElementById('status').innerText = "خطأ في التعرف على الصوت.";
-            speak("عذراً، لم أسمعك جيداً. يرجى المحاولة مرة أخرى.");
-        };
+// ===== LOAD QURAN =====
+fetch("https://api.alquran.cloud/v1/quran/ar.alafasy")
+.then(r=>r.json())
+.then(data=>{
+    allSurahs=data.data.surahs;
+});
 
-        // تحليل ذكاء التطبيق للرد على الكلمات المفتاحية
-        function handleUserCommand(command) {
-            if (command.includes("أين أنا") || command.includes("مكان") || command.includes("موقعي")) {
-                getLocation();
-            } else if (command.includes("الأماكن القريبة") || command.includes("أماكن قريبة") || command.includes("قريب مني")) {
-                findNearbyPlaces();
-            } else {
-                speak("فهمت أنك تقول " + command + ". ولكن يمكنك سؤالي عن موقعك أو الأماكن القريبة فقط حالياً.");
-            }
-        }
+// ===== NAV =====
+function show(id){
+    document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
+    document.getElementById(id).classList.add("active");
+}
 
-        // وظيفة تحديد الموقع الجغرافي الحالي للمستخدم
-        function getLocation() {
-            if (navigator.geolocation) {
-                document.getElementById('status').innerText = "جاري تحديد موقعك الجغرافي...";
-                navigator.geolocation.getCurrentPosition(function(position) {
-                    const lat = position.coords.latitude;
-                    const lon = position.coords.longitude;
-                    
-                    // تنبيه: في التطبيق الحقيقي نقوم بإرسال هذه الإحداثيات لـ Google Maps لمعرفة اسم الشارع
-                    const reply = "تم تحديد موقعك بنجاح. أنت الآن في منطقة آمنة، وإحداثياتك هي خط عرض " + lat.toFixed(2) + " وخط طول " + lon.toFixed(2);
-                    speak(reply);
-                    document.getElementById('status').innerText = "تم تحديد الموقع.";
-                }, function() {
-                    speak("عذراً، فشلت في تحديد موقعك. تأكد من تفعيل خدمة تحديد الموقع في هاتفك.");
-                });
-            } else {
-                speak("عذراً، جهازك لا يدعم خاصية تحديد الموقع.");
-            }
-        }
+function openQuran(){show("quran")}
+function openTasbeeh(){show("tasbeeh")}
+function openPlan(){show("plan")}
+function backHome(){show("home")}
+function backQuran(){show("quran")}
 
-        // وظيفة محاكاة الأماكن القريبة (تطبيق افتراضي)
-        function findNearbyPlaces() {
-            document.getElementById('status').innerText = "جاري البحث عن الأماكن القريبة...";
-            
-            // في التطبيقات المتقدمة نستخدم (Google Places API) لجلب الأماكن الحقيقية، هنا وضعنا أماكن افتراضية للشرح:
-            const places = [
-                "صيدلية الشفاء على بعد خمسين متراً",
-                "سوبر ماركت الأمانة على بعد مئة متر",
-                "مستشفى الأمل على بعد ربع كيلومتر"
-            ];
+// ===== SEARCH =====
+function searchQuran(){
+    let val=document.getElementById("search").value;
+    let res=document.getElementById("result");
 
-            // تفريغ القائمة القديمة
-            const listContainer = document.getElementById('places-list');
-            listContainer.innerHTML = "";
+    let found=allSurahs.filter(s=>
+        s.name.includes(val)
+    );
 
-            // نطق الأماكن وعرضها
-            speak("الأماكن القريبة منك هي:");
-            
-            places.forEach((place, index) => {
-                setTimeout(() => {
-                    // إضافة المكان للقائمة بصرياً
-                    const li = document.createElement('li');
-                    li.innerText = place;
-                    listContainer.appendChild(li);
-                    // نطق المكان
-                    speak(place);
-                }, index * 2500); // فاصل زمني بين كل جملة وجملة لكي لا تتداخل الأصوات
-            });
-        }
-    </script>
+    res.innerHTML="";
+
+    found.forEach(s=>{
+        let div=document.createElement("div");
+        div.className="card";
+
+        div.innerHTML=s.number+" - "+s.name;
+
+        div.onclick=()=>openSurah(s);
+
+        res.appendChild(div);
+    });
+}
+
+// ===== OPEN SURAH =====
+function openSurah(surah){
+    show("surahPage");
+
+    document.getElementById("surahTitle").innerText=
+    surah.number+" - "+surah.name;
+
+    let ayahs=surah.ayahs.map(a=>
+        `<div class="ayah">${a.text}</div>`
+    ).join("");
+
+    document.getElementById("ayahs").innerHTML=ayahs;
+
+    // تفسير بسيط API
+    fetch(`https://api.alquran.cloud/v1/ayah/${surah.number}:1/ar.muyassar`)
+    .then(r=>r.json())
+    .then(d=>{
+        document.getElementById("tafsir").innerText=
+        d.data.text;
+    });
+
+    // صوت
+    document.getElementById("audio").src=
+    `https://cdn.islamic.network/quran/audio-surah/128/ar.alafasy/${surah.number}.mp3`;
+}
+
+// ===== TASBEEH =====
+function plus(){
+    count++;
+    document.getElementById("count").innerText=count;
+}
+function reset(){
+    count=0;
+    document.getElementById("count").innerText=count;
+}
+
+// ===== DARK MODE =====
+function toggleDark(){
+    document.body.classList.toggle("dark");
+}
+
+</script>
+
 </body>
 </html>
