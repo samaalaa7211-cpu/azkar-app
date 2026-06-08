@@ -15,7 +15,7 @@
 
 body{
   margin:0;
-  font-family:Arial;
+  font-family:Arial, sans-serif;
   background:var(--bg);
   color:var(--text);
 }
@@ -49,6 +49,7 @@ button{
   margin:5px 0;
   width:100%;
   cursor:pointer;
+  font-size: 16px;
 }
 
 input{
@@ -56,6 +57,7 @@ input{
   padding:10px;
   margin:5px 0;
   border-radius:8px;
+  box-sizing: border-box;
 }
 
 .ayah{
@@ -64,18 +66,38 @@ input{
   margin:5px 0;
   border-radius:8px;
   font-size:18px;
+  line-height: 1.6;
 }
 
 .number{
-  font-size:20px;
-  padding:8px;
-  margin:5px;
+  font-size:18px;
+  padding:12px;
+  margin:8px 0;
   background:#e3f2fd;
   border-radius:8px;
+  transition: all 0.3s ease;
+  border: 1px solid #cee6f8;
 }
 
-.audioBox{
-  margin-top:10px;
+.listening {
+  background: #fff59d !important; /* لون أصفر يوضح أن المايك يقرأ هذه الآية الآن */
+  border: 1px solid #fbc02d;
+  font-weight: bold;
+}
+
+.success-ayah {
+  background: #e8f5e9 !important; /* لون أخضر هادئ تظهر به الآية المشكلة والتجويد */
+  border: 1px solid #a5d6a7;
+  font-size: 20px;
+  color: #2e7d32;
+  line-height: 1.8;
+}
+
+#status {
+  text-align: center;
+  font-weight: bold;
+  color: #c62828;
+  margin: 10px 0;
 }
 </style>
 </head>
@@ -84,7 +106,6 @@ input{
 
 <header>📖 القرآن الكريم - النسخة الزرقاء</header>
 
-<!-- HOME -->
 <div id="home" class="page active">
   <h3>السور</h3>
 
@@ -94,19 +115,17 @@ input{
   <div id="list"></div>
 </div>
 
-<!-- SURAH PAGE -->
 <div id="surah" class="page">
   <h3 id="surahTitle"></h3>
 
   <button onclick="openTalawe()">🎧 تلاوة السورة كاملة</button>
-  <button onclick="openMemorize()">🧠 تسميع الآيات</button>
+  <button onclick="openMemorize()">🧠 تسميع الآيات بالتفاعل الصوتي</button>
 
   <div id="ayahs"></div>
 
   <button onclick="backHome()">رجوع</button>
 </div>
 
-<!-- TALAWE -->
 <div id="talawe" class="page">
   <h3>🎧 التلاوة الكاملة</h3>
 
@@ -115,14 +134,14 @@ input{
   <button onclick="backSurah()">رجوع</button>
 </div>
 
-<!-- MEMORIZE -->
 <div id="mem" class="page">
-  <h3>🧠 التسميع (أرقام فقط)</h3>
+  <h3>🧠 التسميع الصوتي التفاعلي</h3>
+  <div id="status">اضغط ابدأ لبدء التسميع بالصوت</div>
 
   <div id="numbers"></div>
 
-  <button onclick="startRecite()">▶ ابدأ</button>
-  <button onclick="stopRecite()">⏹ إيقاف</button>
+  <button onclick="startRecite()">▶ ابدأ الاستماع</button>
+  <button onclick="stopRecite()">⏹ إيقاف الاستماع</button>
 
   <button onclick="backSurah()">رجوع</button>
 </div>
@@ -132,8 +151,49 @@ input{
 let surahs=[];
 let current=null;
 let audio=document.getElementById("audio");
-let interval;
 let ayahIndex=0;
+
+// إعداد خاصية التعرف على الصوت
+let recognition;
+if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  recognition = new SpeechRecognition();
+  recognition.lang = 'ar-EG'; // اللغة العربية
+  recognition.continuous = false; // يقف بعد كل آية ليقارن ثم يعيد تشغيل نفسه للآية التالية
+  recognition.interimResults = false;
+
+  recognition.onresult = function(event) {
+    let resultText = event.results[0][0].transcript;
+    checkRecitation(resultText);
+  };
+
+  recognition.onerror = function(event) {
+    console.log("خطأ في المايكروفون أو لم يتم سماع صوت: " + event.error);
+    // إعادة تشغيل المايكروفون تلقائياً إذا توقف بسبب عدم سماع صوت لضمان استمرارية التسميع
+    if(event.error === 'no-speech' && ayahIndex < current.ayahs.length) {
+      document.getElementById("status").innerText = "🎙️ لم أسمعك جيداً، أعد قراءة الآية الحالية...";
+      setTimeout(() => { if(recognition) recognition.start(); }, 1000);
+    }
+  };
+
+  recognition.onend = function() {
+    // في حال انتهى الاستماع ولم ننتقل للآية التالية بعد، يعود للاستماع لنفس الآية
+    let statusText = document.getElementById("status").innerText;
+    if(statusText.includes("🎙️ مستمع") && ayahIndex < current.ayahs.length) {
+        try { recognition.start(); } catch(e){}
+    }
+  };
+}
+
+// دالة لتنظيف النص العربي من التشكيل والتنوين لتسهيل المقارنة البرمجية الصحيحة للصوت
+function cleanArabicText(text) {
+  return text
+    .replace(/[\u064B-\u065F]/g, "") // إزالة التشكيل والسكون
+    .replace(/[أإآ]/g, "ا") // توحيد الألفات
+    .replace(/ة/g, "ه") // توحيد التاء المربوطة والهاء
+    .replace(/ى/g, "ي") // توحيد الألف المقصورة والياء
+    .trim();
+}
 
 // ===== LOAD QURAN =====
 fetch("https://api.alquran.cloud/v1/quran/ar.alafasy")
@@ -195,6 +255,7 @@ function openTalawe(){
 }
 
 function backSurah(){
+  stopRecite();
   show("surah");
 }
 
@@ -205,6 +266,7 @@ function backHome(){
 // ===== MEMORIZE =====
 function openMemorize(){
   show("mem");
+  document.getElementById("status").innerText = "اضغط ابدأ لبدء التسميع بالصوت";
 
   let box=document.getElementById("numbers");
   box.innerHTML="";
@@ -212,31 +274,124 @@ function openMemorize(){
   current.ayahs.forEach((a,i)=>{
     let d=document.createElement("div");
     d.className="number";
+    d.id = "num-" + i;
     d.innerHTML="آية رقم " + (i+1);
     box.appendChild(d);
   });
 }
 
-// ===== SIMULATED RECITATION =====
+// ===== VOICE RECITATION LOGIC =====
 function startRecite(){
-  ayahIndex=0;
+  if (!recognition) {
+    alert("عذراً، متصفحك لا يدعم ميزة التعرف على الصوت. يرجى استخدام متصفح Google Chrome.");
+    return;
+  }
+  ayahIndex = 0;
+  // إعادة تصفير كل العناصر للشكل الأصلي
+  document.querySelectorAll(".number").forEach((item, i) => {
+    item.className = "number";
+    item.innerHTML = "آية رقم " + (i+1);
+  });
+  
+  listenToCurrentAyah();
+}
 
-  interval=setInterval(()=>{
-    if(ayahIndex<current.ayahs.length){
-      let items=document.querySelectorAll(".number");
-      items[ayahIndex].style.background="#bbdefb";
-      ayahIndex++;
-    }else{
-      clearInterval(interval);
+function listenToCurrentAyah() {
+  if(ayahIndex < current.ayahs.length) {
+    document.getElementById("status").innerText = `🎙️ مستمع للآية رقم (${ayahIndex + 1})... اقرأ الآن`;
+    
+    // تمييز الآية المطلوبة باللون الأصفر
+    let currentItem = document.getElementById("num-" + ayahIndex);
+    if(currentItem) {
+      currentItem.classList.add("listening");
     }
-  },1500);
+    
+    try {
+      recognition.start();
+    } catch(e) {
+      // إذا كان يعمل بالفعل لا نفعل شيئاً
+    }
+  } else {
+    document.getElementById("status").innerText = "🎉 بارك الله فيك! أكملت تسميع السورة بنجاح.";
+  }
+}
+
+function checkRecitation(userVoiceText) {
+  let originalAyah = current.ayahs[ayahIndex].text;
+  
+  let cleanOriginal = cleanArabicText(originalAyah);
+  let cleanUser = cleanArabicText(userVoiceText);
+  
+  console.log("الآية الأصلية المصورة مبرمجاً:", cleanOriginal);
+  console.log("ما سمعه المايك:", cleanUser);
+
+  // إذا كانت الكلمات المسموعة موجودة أو متطابقة مع النص الأصلي
+  if(cleanOriginal.includes(cleanUser) || cleanUser.includes(cleanOriginal) || similarity(cleanOriginal, cleanUser) > 0.6) {
+    let currentItem = document.getElementById("num-" + ayahIndex);
+    if(currentItem) {
+      currentItem.classList.remove("listening");
+      currentItem.classList.add("success-ayah");
+      // إظهار الآية كاملة بالتجويد والتشكيل رقم الترتيب
+      currentItem.innerHTML = `﴿${ayahIndex + 1}﴾ ${originalAyah}`;
+    }
+    
+    // الانتقال التلقائي للآية التالية
+    ayahIndex++;
+    setTimeout(() => {
+      listenToCurrentAyah();
+    }, 800);
+  } else {
+    document.getElementById("status").innerText = `❌ المقارنة غير مطابقة تماماً. أنت قلت: "${userVoiceText}". حاول مرة أخرى...`;
+    setTimeout(() => {
+      if(ayahIndex < current.ayahs.length) {
+         document.getElementById("status").innerText = `🎙️ مستمع للآية رقم (${ayahIndex + 1})... اقرأ الآن`;
+         try { recognition.start(); } catch(e){}
+      }
+    }, 2000);
+  }
 }
 
 function stopRecite(){
-  clearInterval(interval);
+  if(recognition) {
+    recognition.stop();
+  }
+  document.getElementById("status").innerText = "⏹️ تم إيقاف الاستماع.";
+  document.querySelectorAll(".listening").forEach(item => item.classList.remove("listening"));
+}
+
+// دالة تقريبية إضافية للتأكد من نسبة تشابه النصوص في حال سقطت كلمة أو حرف أثناء لقط المايك
+function similarity(s1, s2) {
+  let longer = s1;
+  let shorter = s2;
+  if (s1.length < s2.length) { longer = s2; shorter = s1; }
+  let longerLength = longer.length;
+  if (longerLength == 0) { return 1.0; }
+  return (longerLength - editDistance(longer, shorter)) / parseFloat(longerLength);
+}
+
+function editDistance(s1, s2) {
+  s1 = s1.toLowerCase(); s2 = s2.toLowerCase();
+  let costs = new Array();
+  for (let i = 0; i <= s1.length; i++) {
+    let lastValue = i;
+    for (let j = 0; j <= s2.length; j++) {
+      if (i == 0) costs[j] = j;
+      else {
+        if (j > 0) {
+          let newValue = costs[j - 1];
+          if (s1.charAt(i - 1) != s2.charAt(j - 1))
+            newValue = Math.min(Math.min(newValue, lastValue), costs[j]) + 1;
+          costs[j - 1] = lastValue; lastValue = newValue;
+        }
+      }
+    }
+    if (i > 0) costs[s2.length] = lastValue;
+  }
+  return costs[s2.length];
 }
 
 </script>
 
 </body>
 </html>
+
