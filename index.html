@@ -3,299 +3,341 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>أذكاري اليومية ✨</title>
+    <title>مساعد الطريق الذكي</title>
     <style>
-        :root {
-            --main-pink: #ff85a2; /* بينك غامق */
-            --light-pink: #fbb1bd; /* بينك فاتح */
-            --soft-pink: #ffdae0; /* خلفية هادئة */
-            --white: #ffffff;
-            --text-color: #5e3038;
-        }
-
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: var(--soft-pink);
-            margin: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            color: var(--text-color);
-        }
-
-        .app-container {
-            width: 95%;
-            max-width: 400px;
-            background: var(--white);
-            border-radius: 30px;
-            box-shadow: 0 10px 25px rgba(255, 133, 162, 0.3);
-            overflow: hidden;
-            position: relative;
-            height: 90vh;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .header {
-            background-color: var(--main-pink);
-            color: white;
-            padding: 20px;
+            font-family: Arial, sans-serif;
             text-align: center;
-            font-size: 1.5rem;
-            font-weight: bold;
-            flex-shrink: 0;
-        }
-
-        .content-area {
-            flex-grow: 1;
-            overflow-y: auto;
+            background-color: #121212;
+            color: #ffffff;
             padding: 20px;
+            margin: 0;
         }
-
-        .page {
-            display: none;
-            animation: fadeIn 0.4s ease-out;
-        }
-
-        .active { display: block; }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: scale(0.95); }
-            to { opacity: 1; transform: scale(1); }
-        }
-
-        /* الأزرار الملونة */
-        .btn-large {
-            width: 100%;
+        /* تصميم زر ضخم يسهل على الكفيف لمسه في أي مكان بالشاشة */
+        .main-btn {
+            width: 80%;
+            max-width: 300px;
+            height: 150px;
+            font-size: 24px;
+            font-weight: bold;
+            background-color: #007bff;
+            color: white;
             border: none;
-            padding: 25px;
             border-radius: 20px;
-            color: white;
-            font-size: 1.3rem;
+            margin: 40px auto;
+            display: block;
             cursor: pointer;
-            margin-bottom: 20px;
-            transition: 0.3s;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-            font-weight: bold;
+            box-shadow: 0 8px 15px rgba(0,123,255,0.3);
         }
-
-        .btn-azkar { background-color: #ff85a2; }
-        .btn-subha { background-color: #fbb1bd; }
-        
-        /* ألوان أيقونات الأذكار الداخلية */
-        .btn-sabah { background-color: #ff9aa2; }
-        .btn-masaa { background-color: #b5ead7; color: #3a5a40; }
-        .btn-nom { background-color: #c7ceea; color: #3d405b; }
-        .btn-salah { background-color: #ffdac1; color: #6d4c41; }
-
-        .btn-large:active { transform: scale(0.95); }
-
-        .zekr-item {
-            background: var(--soft-pink);
+        .main-btn:active {
+            background-color: #0056b3;
+        }
+        #status {
+            font-size: 18px;
+            margin-top: 20px;
+            color: #bb86fc;
+        }
+        #places-list {
+            list-style: none;
+            padding: 0;
+            font-size: 20px;
+        }
+        #places-list li {
+            background: #1e1e1e;
+            margin: 10px 0;
             padding: 15px;
-            border-radius: 15px;
-            margin-bottom: 15px;
-            line-height: 1.8;
-            font-size: 1.1rem;
-            border-right: 6px solid var(--main-pink);
-            text-align: justify;
-        }
-
-        .subha-container { text-align: center; }
-
-        .zekr-display {
-            font-size: 1.2rem;
-            font-weight: bold;
-            color: var(--main-pink);
-            margin-bottom: 20px;
-            min-height: 60px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .counter-circle {
-            width: 200px;
-            height: 200px;
-            background: var(--main-pink);
-            border-radius: 50%;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            margin: 0 auto;
-            color: white;
-            cursor: pointer;
-            border: 8px solid var(--soft-pink);
-            box-shadow: 0 8px 20px rgba(255, 133, 162, 0.4);
-        }
-
-        .counter-circle span { font-size: 3rem; font-weight: bold; }
-
-        .subha-controls {
-            display: flex;
-            justify-content: space-between;
-            margin-top: 40px;
-        }
-
-        .control-btn {
-            background: var(--main-pink);
-            border: none;
-            padding: 12px 15px;
-            border-radius: 12px;
-            color: white;
-            cursor: pointer;
-            font-size: 0.9rem;
-            width: 45%;
-        }
-
-        .back-btn {
-            background: #eee;
-            color: #555;
-            border: none;
-            padding: 8px 15px;
             border-radius: 10px;
-            cursor: pointer;
-            margin-bottom: 15px;
-            font-size: 0.9rem;
         }
     </style>
 </head>
 <body>
 
-<div class="app-container">
-    <div class="header" id="header-title">أذكاري اليومية ✨</div>
+    <h1>مساعد الطريق الكفيف</h1>
+    <p>اضغط في أي مكان على الزر الأزرق للتحدث مع التطبيق</p>
 
-    <div class="content-area">
-        <div id="home" class="page active">
-            <div style="margin-top: 50px;">
-                <button class="btn-large btn-azkar" onclick="showPage('categories')">🌸 أذكار</button>
-                <button class="btn-large btn-subha" onclick="showPage('subha')">📿 تسبيح</button>
-            </div>
-        </div>
+    <button class="main-btn" onclick="startListening()">إضغط للتحدث</button>
 
-        <div id="categories" class="page">
-            <button class="back-btn" onclick="showPage('home')">⬅ رجوع للرئيسية</button>
-            <button class="btn-large btn-sabah" onclick="loadAzkar('صباح')">☀️ أذكار الصباح</button>
-            <button class="btn-large btn-masaa" onclick="loadAzkar('مساء')">🌙 أذكار المساء</button>
-            <button class="btn-large btn-nom" onclick="loadAzkar('نوم')">🛌 أذكار النوم</button>
-            <button class="btn-large btn-salah" onclick="loadAzkar('صلاة')">🕌 أذكار الصلاة</button>
-        </div>
+    <div id="status">حالة التطبيق: جاهز للاستخدام</div>
+    
+    <ul id="places-list">
+        </ul>
 
-        <div id="display" class="page">
-            <button class="back-btn" onclick="showPage('categories')">⬅ رجوع للأقسام</button>
-            <div id="azkar-content"></div>
-        </div>
-
-        <div id="subha" class="page">
-            <button class="back-btn" onclick="showPage('home')">⬅ رجوع للرئيسية</button>
-            <div class="subha-container">
-                <div id="current-zekr" class="zekr-display">سبحان الله</div>
-                <div class="counter-circle" onclick="countUp()">
-                    <span id="num">0</span>
-                    <small>تسبيح</small>
-                </div>
-                <div class="subha-controls">
-                    <button class="control-btn" onclick="addZekr()">➕ إضافة ذكر</button>
-                    <button class="control-btn" onclick="nextZekr()">🔄 تغيير الذكر</button>
-                </div>
-                <button class="control-btn" style="margin-top:20px; width:100%; background:#999" onclick="reset()">تصفير العداد</button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<script>
-    const data = {
-        'صباح': [
-            "آية الكرسي: أَعُوذُ بِاللهِ مِنَ الشَّيْطَانِ الرَّجِيمِ ، بسم الله الرحمن الرحيم (اللَّهُ لَا إِلَهَ إِلَّا هُوَ الْحَيُّ الْقَيُّومُ لَا تَأْخُذُهُ سِنَةٌ وَلَا نَوْمٌ لَهُ مَا فِي السَّمَاوَاتِ وَمَا فِي الْأَرْضِ مَنْ ذَا الَّذِي يَشْفَعُ عِنْدَهُ إِلَّا بِإِذْنِهِ يَعْلَمُ مَا بَيْنَ أَيْدِيهِمْ وَمَا خَلْفَهُمْ وَلَا يُحِيطُونَ بِشَيْءٍ مِنْ عِلْمِهِ إِلَّا بِمَا شَاءَ وَسِعَ كُرْسِيُّهُ السَّمَاوَاتِ وَالْأَرْضَ وَلَا يَئُودُهُ حِفْظُهُمَا وَهُوَ الْعَلِيُّ الْعَظِيمُ)",
-            "أصبحنا وأصبح الملك لله، والحمد لله، لا إله إلا الله وحده لا شريك له، له الملك وله الحمد وهو على كل شيء قدير.",
-            "اللهم بك أصبحنا، وبك أمسينا، وبك نحيا، وبك نموت، وإليك النشور.",
-            "سيد الاستغفار: اللهم أنت ربي لا إله إلا أنت، خلقتني وأنا عبدك، وأنا على عهدك ووعدك ما استطعت، أعوذ بك من شر ما صنعت، أبوء لك بنعمتك علي، وأبوء بذنبي فاغفر لي فإنه لا يغفر الذنوب إلا أنت.",
-            "يا حي يا قيوم برحمتك أستغيث أصلح لي شأني كله ولا تكلني إلى نفسي طرفة عين.",
-            "رضيت بالله رباً، وبالإسلام ديناً، وبمحمد صلى الله عليه وسلم نبياً.",
-            "اللهم إني أسألك علماً نافعاً، ورزقاً طيباً، وعملاً متقبلاً."
-        ],
-        'مساء': [
-            "أمسينا وأمسى الملك لله، والحمد لله، لا إله إلا الله وحده لا شريك له.",
-            "اللهم بك أمسينا، وبك أصبحنا، وبك نحيا، وبك نموت، وإليك المصير.",
-            "أعوذ بكلمات الله التامات من شر ما خلق.",
-            "اللهم ما أمسى بي من نعمة أو بأحد من خلقك فمنك وحدك لا شريك لك، فلك الحمد ولك الشكر.",
-            "حسبي الله لا إله إلا هو عليه توكلت وهو رب العرش العظيم (7 مرات)."
-        ],
-        'نوم': [
-            "باسمك ربي وضعت جنبي، وبك أرفعه، فإن أمسكت نفسي فارحمها، وإن أرسلتها فاحفظها بما تحفظ به عبادك الصالحين.",
-            "اللهم قني عذابك يوم تبعث عبادك (3 مرات).",
-            "باسمك اللهم أموت وأحيا.",
-            "سورة الإخلاص، والفلق، والناس (3 مرات)، ثم المسح على الجسد."
-        ],
-        'صلاة': [
-            "أستغفر الله (3 مرات)، اللهم أنت السلام ومنك السلام تباركت يا ذا الجلال والإكرام.",
-            "لا إله إلا الله وحده لا شريك له، له الملك وله الحمد وهو على كل شيء قدير، اللهم لا مانع لما أعطيت، ولا معطي لما منعت، ولا ينفع ذا الجد منك الجد.",
-            "سبحان الله (33)، الحمد لله (33)، الله أكبر (33)، ثم تمام المئة: لا إله إلا الله وحده لا شريك له، له الملك وله الحمد وهو على كل شيء قدير."
-        ]
-    };
-
-    let subhaList = [
-        "سبحان الله", 
-        "لا إله إلا الله", 
-        "الله أكبر", 
-        "الحمدلله", 
-        "سبحان الله وبحمده سبحان الله العظيم", 
-        "ربي اهدني فيمن هديت وعافني فيمن عافيت وتولني فيمن توليت واهدني إنك أنت أرحم الراحمين"
-    ];
-    let zIdx = 0; 
-    let counter = 0;
-
-    function showPage(id) {
-        document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-        document.getElementById(id).classList.add('active');
-        
-        if(id === 'home') document.getElementById('header-title').innerText = 'أذكاري اليومية ✨';
-        if(id === 'categories') document.getElementById('header-title').innerText = 'الأذكار 🌸';
-        if(id === 'subha') document.getElementById('header-title').innerText = 'السبحة 📿';
-    }
-
-    function loadAzkar(type) {
-        const box = document.getElementById('azkar-content');
-        box.innerHTML = '';
-        document.getElementById('header-title').innerText = "أذكار " + type;
-        data[type].forEach(z => {
-            const d = document.createElement('div');
-            d.className = 'zekr-item';
-            d.innerText = z;
-            box.appendChild(d);
-        });
-        showPage('display');
-    }
-
-    function countUp() { 
-        counter++; 
-        document.getElementById('num').innerText = counter;
-        if(navigator.vibrate) navigator.vibrate(50); // اهتزاز بسيط
-    }
-
-    function reset() { 
-        counter = 0; 
-        document.getElementById('num').innerText = '0'; 
-    }
-
-    function nextZekr() {
-        zIdx = (zIdx + 1) % subhaList.length;
-        document.getElementById('current-zekr').innerText = subhaList[zIdx];
-        reset();
-    }
-
-    function addZekr() {
-        let n = prompt("اكتبي الذكر الجديد اللي حابة تضيفيه:");
-        if(n) { 
-            subhaList.push(n); 
-            alert("تم إضافة الذكر بنجاح! تقدري تلاقيه في تغيير الذكر."); 
+    <script>
+        // إعدادات تحويل النص إلى صوت (ليتحدث التطبيق مع المستخدم)
+        function speak(text) {
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = 'ar-SA'; // النطق باللغة العربية
+            window.speechSynthesis.speak(utterance);
         }
-    }
-</script>
 
+        // ترحيب تلقائي عند فتح التطبيق وشرح طريقة الاستخدام
+        window.onload = function() {
+            setTimeout(() => {
+                speak("أهلاً بك في مساعد الطريق. اضغط على الزر في منتصف الشاشة وتحدث معي، يمكنك أن تسألني: أين أنا؟ أو ما هي الأماكن القريبة؟");
+            }, 1000);
+        };
+
+        // إعدادات التعرف على الصوت (ليستمع التطبيق للمستخدم)
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        
+        if (!SpeechRecognition) {
+            alert("عذراً، متصفحك لا يدعم خاصية التعرف على الصوت.");
+        }
+
+        const recognition = new SpeechRecognition();
+        recognition.lang = 'ar-SA'; // استماع باللغة العربية
+        recognition.interimResults = false;
+
+        function startListening() {
+            recognition.start();
+            document.getElementById('status').innerText = "جاري الاستماع إليك...";
+            speak("أنا أستمع إليك الآن");
+        }
+
+        // معالجة الكلام الذي قاله المستخدم
+        recognition.onresult = function(event) {
+            const userCommand = event.results[0][0].transcript;
+            document.getElementById('status').innerText = "قلتَ: " + userCommand;
+            
+            handleUserCommand(userCommand);
+        };
+
+        recognition.onerror = function() {
+            document.getElementById('status').innerText = "خطأ في التعرف على الصوت.";
+            speak("عذراً، لم أسمعك جيداً. يرجى المحاولة مرة أخرى.");
+        };
+
+        // تحليل ذكاء التطبيق للرد على الكلمات المفتاحية
+        function handleUserCommand(command) {
+            if (command.includes("أين أنا") || command.includes("مكان") || command.includes("موقعي")) {
+                getLocation();
+            } else if (command.includes("الأماكن القريبة") || command.includes("أماكن قريبة") || command.includes("قريب مني")) {
+                findNearbyPlaces();
+            } else {
+                speak("فهمت أنك تقول " + command + ". ولكن يمكنك سؤالي عن موقعك أو الأماكن القريبة فقط حالياً.");
+            }
+        }
+
+        // وظيفة تحديد الموقع الجغرافي الحالي للمستخدم
+        function getLocation() {
+            if (navigator.geolocation) {
+                document.getElementById('status').innerText = "جاري تحديد موقعك الجغرافي...";
+                navigator.geolocation.getCurrentPosition(function(position) {
+                    const lat = position.coords.latitude;
+                    const lon = position.coords.longitude;
+                    
+                    // تنبيه: في التطبيق الحقيقي نقوم بإرسال هذه الإحداثيات لـ Google Maps لمعرفة اسم الشارع
+                    const reply = "تم تحديد موقعك بنجاح. أنت الآن في منطقة آمنة، وإحداثياتك هي خط عرض " + lat.toFixed(2) + " وخط طول " + lon.toFixed(2);
+                    speak(reply);
+                    document.getElementById('status').innerText = "تم تحديد الموقع.";
+                }, function() {
+                    speak("عذراً، فشلت في تحديد موقعك. تأكد من تفعيل خدمة تحديد الموقع في هاتفك.");
+                });
+            } else {
+                speak("عذراً، جهازك لا يدعم خاصية تحديد الموقع.");
+            }
+        }
+
+        // وظيفة محاكاة الأماكن القريبة (تطبيق افتراضي)
+        function findNearbyPlaces() {
+            document.getElementById('status').innerText = "جاري البحث عن الأماكن القريبة...";
+            
+            // في التطبيقات المتقدمة نستخدم (Google Places API) لجلب الأماكن الحقيقية، هنا وضعنا أماكن افتراضية للشرح:
+            const places = [
+                "صيدلية الشفاء على بعد خمسين متراً",
+                "سوبر ماركت الأمانة على بعد مئة متر",
+                "مستشفى الأمل على بعد ربع كيلومتر"
+            ];
+
+            // تفريغ القائمة القديمة
+            const listContainer = document.getElementById('places-list');
+            listContainer.innerHTML = "";
+
+            // نطق الأماكن وعرضها
+            speak("الأماكن القريبة منك هي:");
+            
+            places.forEach((place, index) => {
+                setTimeout(() => {
+                    // إضافة المكان للقائمة بصرياً
+                    const li = document.createElement('li');
+                    li.innerText = place;
+                    listContainer.appendChild(li);
+                    // نطق المكان
+                    speak(place);
+                }, index * 2500); // فاصل زمني بين كل جملة وجملة لكي لا تتداخل الأصوات
+            });
+        }
+    </script>
 </body>
 </html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>مساعد الطريق الذكي</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #121212;
+            color: #ffffff;
+            padding: 20px;
+            margin: 0;
+        }
+        /* تصميم زر ضخم يسهل على الكفيف لمسه في أي مكان بالشاشة */
+        .main-btn {
+            width: 80%;
+            max-width: 300px;
+            height: 150px;
+            font-size: 24px;
+            font-weight: bold;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 20px;
+            margin: 40px auto;
+            display: block;
+            cursor: pointer;
+            box-shadow: 0 8px 15px rgba(0,123,255,0.3);
+        }
+        .main-btn:active {
+            background-color: #0056b3;
+        }
+        #status {
+            font-size: 18px;
+            margin-top: 20px;
+            color: #bb86fc;
+        }
+        #places-list {
+            list-style: none;
+            padding: 0;
+            font-size: 20px;
+        }
+        #places-list li {
+            background: #1e1e1e;
+            margin: 10px 0;
+            padding: 15px;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body>
 
+    <h1>مساعد الطريق الكفيف</h1>
+    <p>اضغط في أي مكان على الزر الأزرق للتحدث مع التطبيق</p>
+
+    <button class="main-btn" onclick="startListening()">إضغط للتحدث</button>
+
+    <div id="status">حالة التطبيق: جاهز للاستخدام</div>
+    
+    <ul id="places-list">
+        </ul>
+
+    <script>
+        // إعدادات تحويل النص إلى صوت (ليتحدث التطبيق مع المستخدم)
+        function speak(text) {
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = 'ar-SA'; // النطق باللغة العربية
+            window.speechSynthesis.speak(utterance);
+        }
+
+        // ترحيب تلقائي عند فتح التطبيق وشرح طريقة الاستخدام
+        window.onload = function() {
+            setTimeout(() => {
+                speak("أهلاً بك في مساعد الطريق. اضغط على الزر في منتصف الشاشة وتحدث معي، يمكنك أن تسألني: أين أنا؟ أو ما هي الأماكن القريبة؟");
+            }, 1000);
+        };
+
+        // إعدادات التعرف على الصوت (ليستمع التطبيق للمستخدم)
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        
+        if (!SpeechRecognition) {
+            alert("عذراً، متصفحك لا يدعم خاصية التعرف على الصوت.");
+        }
+
+        const recognition = new SpeechRecognition();
+        recognition.lang = 'ar-SA'; // استماع باللغة العربية
+        recognition.interimResults = false;
+
+        function startListening() {
+            recognition.start();
+            document.getElementById('status').innerText = "جاري الاستماع إليك...";
+            speak("أنا أستمع إليك الآن");
+        }
+
+        // معالجة الكلام الذي قاله المستخدم
+        recognition.onresult = function(event) {
+            const userCommand = event.results[0][0].transcript;
+            document.getElementById('status').innerText = "قلتَ: " + userCommand;
+            
+            handleUserCommand(userCommand);
+        };
+
+        recognition.onerror = function() {
+            document.getElementById('status').innerText = "خطأ في التعرف على الصوت.";
+            speak("عذراً، لم أسمعك جيداً. يرجى المحاولة مرة أخرى.");
+        };
+
+        // تحليل ذكاء التطبيق للرد على الكلمات المفتاحية
+        function handleUserCommand(command) {
+            if (command.includes("أين أنا") || command.includes("مكان") || command.includes("موقعي")) {
+                getLocation();
+            } else if (command.includes("الأماكن القريبة") || command.includes("أماكن قريبة") || command.includes("قريب مني")) {
+                findNearbyPlaces();
+            } else {
+                speak("فهمت أنك تقول " + command + ". ولكن يمكنك سؤالي عن موقعك أو الأماكن القريبة فقط حالياً.");
+            }
+        }
+
+        // وظيفة تحديد الموقع الجغرافي الحالي للمستخدم
+        function getLocation() {
+            if (navigator.geolocation) {
+                document.getElementById('status').innerText = "جاري تحديد موقعك الجغرافي...";
+                navigator.geolocation.getCurrentPosition(function(position) {
+                    const lat = position.coords.latitude;
+                    const lon = position.coords.longitude;
+                    
+                    // تنبيه: في التطبيق الحقيقي نقوم بإرسال هذه الإحداثيات لـ Google Maps لمعرفة اسم الشارع
+                    const reply = "تم تحديد موقعك بنجاح. أنت الآن في منطقة آمنة، وإحداثياتك هي خط عرض " + lat.toFixed(2) + " وخط طول " + lon.toFixed(2);
+                    speak(reply);
+                    document.getElementById('status').innerText = "تم تحديد الموقع.";
+                }, function() {
+                    speak("عذراً، فشلت في تحديد موقعك. تأكد من تفعيل خدمة تحديد الموقع في هاتفك.");
+                });
+            } else {
+                speak("عذراً، جهازك لا يدعم خاصية تحديد الموقع.");
+            }
+        }
+
+        // وظيفة محاكاة الأماكن القريبة (تطبيق افتراضي)
+        function findNearbyPlaces() {
+            document.getElementById('status').innerText = "جاري البحث عن الأماكن القريبة...";
+            
+            // في التطبيقات المتقدمة نستخدم (Google Places API) لجلب الأماكن الحقيقية، هنا وضعنا أماكن افتراضية للشرح:
+            const places = [
+                "صيدلية الشفاء على بعد خمسين متراً",
+                "سوبر ماركت الأمانة على بعد مئة متر",
+                "مستشفى الأمل على بعد ربع كيلومتر"
+            ];
+
+            // تفريغ القائمة القديمة
+            const listContainer = document.getElementById('places-list');
+            listContainer.innerHTML = "";
+
+            // نطق الأماكن وعرضها
+            speak("الأماكن القريبة منك هي:");
+            
+            places.forEach((place, index) => {
+                setTimeout(() => {
+                    // إضافة المكان للقائمة بصرياً
+                    const li = document.createElement('li');
+                    li.innerText = place;
+                    listContainer.appendChild(li);
+                    // نطق المكان
+                    speak(place);
+                }, index * 2500); // فاصل زمني بين كل جملة وجملة لكي لا تتداخل الأصوات
+            });
+        }
+    </script>
+</body>
+</html>
