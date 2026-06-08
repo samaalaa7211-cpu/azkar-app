@@ -3,42 +3,52 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Offline Quran Pro</title>
+<title>Quran Blue App</title>
 
 <style>
+:root{
+  --main:#1e88e5;
+  --bg:#f5f9ff;
+  --card:#ffffff;
+  --text:#0a0a0a;
+}
+
 body{
   margin:0;
   font-family:Arial;
-  background:#f5f6fa;
+  background:var(--bg);
+  color:var(--text);
 }
 
 header{
-  background:#1f7a5c;
+  background:var(--main);
   color:white;
   padding:15px;
   text-align:center;
+  font-size:20px;
 }
 
 .page{display:none;padding:15px;}
 .active{display:block;}
 
 .card{
-  background:white;
+  background:var(--card);
   padding:12px;
   margin:8px 0;
   border-radius:10px;
-  box-shadow:0 2px 6px rgba(0,0,0,0.1);
+  box-shadow:0 2px 8px rgba(0,0,0,0.1);
   cursor:pointer;
 }
 
 button{
-  background:#1f7a5c;
+  background:var(--main);
   color:white;
   border:none;
   padding:10px;
   border-radius:8px;
   margin:5px 0;
   width:100%;
+  cursor:pointer;
 }
 
 input{
@@ -49,14 +59,22 @@ input{
 }
 
 .ayah{
-  background:#fff;
+  background:#eef5ff;
   padding:10px;
   margin:5px 0;
   border-radius:8px;
+  font-size:18px;
 }
 
-audio{
-  width:100%;
+.number{
+  font-size:20px;
+  padding:8px;
+  margin:5px;
+  background:#e3f2fd;
+  border-radius:8px;
+}
+
+.audioBox{
   margin-top:10px;
 }
 </style>
@@ -64,37 +82,49 @@ audio{
 
 <body>
 
-<header>📖 Offline Quran Pro</header>
+<header>📖 القرآن الكريم - النسخة الزرقاء</header>
 
 <!-- HOME -->
 <div id="home" class="page active">
-  <div class="card" onclick="openQuran()">📖 القرآن الكريم</div>
-</div>
-
-<!-- QURAN -->
-<div id="quran" class="page">
   <h3>السور</h3>
 
   <input id="search" placeholder="ابحث عن سورة">
-  <button onclick="search()">بحث</button>
+  <button onclick="searchSurah()">بحث</button>
 
   <div id="list"></div>
-
-  <button onclick="back()">رجوع</button>
 </div>
 
-<!-- SURAH -->
-<div id="surahPage" class="page">
-  <h3 id="title"></h3>
+<!-- SURAH PAGE -->
+<div id="surah" class="page">
+  <h3 id="surahTitle"></h3>
+
+  <button onclick="openTalawe()">🎧 تلاوة السورة كاملة</button>
+  <button onclick="openMemorize()">🧠 تسميع الآيات</button>
 
   <div id="ayahs"></div>
 
-  <button onclick="play()">▶ تشغيل التلاوة</button>
-  <button onclick="stop()">⏹ إيقاف</button>
+  <button onclick="backHome()">رجوع</button>
+</div>
+
+<!-- TALAWE -->
+<div id="talawe" class="page">
+  <h3>🎧 التلاوة الكاملة</h3>
 
   <audio id="audio" controls></audio>
 
-  <button onclick="backList()">رجوع</button>
+  <button onclick="backSurah()">رجوع</button>
+</div>
+
+<!-- MEMORIZE -->
+<div id="mem" class="page">
+  <h3>🧠 التسميع (أرقام فقط)</h3>
+
+  <div id="numbers"></div>
+
+  <button onclick="startRecite()">▶ ابدأ</button>
+  <button onclick="stopRecite()">⏹ إيقاف</button>
+
+  <button onclick="backSurah()">رجوع</button>
 </div>
 
 <script>
@@ -102,20 +132,16 @@ audio{
 let surahs=[];
 let current=null;
 let audio=document.getElementById("audio");
+let interval;
+let ayahIndex=0;
 
-// ===== OFFLINE CACHE LOAD =====
-let cached = localStorage.getItem("quran");
-
-if(cached){
-  surahs = JSON.parse(cached);
-}else{
-  fetch("https://api.alquran.cloud/v1/quran/ar.alafasy")
-  .then(r=>r.json())
-  .then(d=>{
-    surahs = d.data.surahs;
-    localStorage.setItem("quran", JSON.stringify(surahs));
-  });
-}
+// ===== LOAD QURAN =====
+fetch("https://api.alquran.cloud/v1/quran/ar.alafasy")
+.then(r=>r.json())
+.then(d=>{
+  surahs=d.data.surahs;
+  render(surahs);
+});
 
 // ===== NAV =====
 function show(id){
@@ -123,20 +149,7 @@ function show(id){
   document.getElementById(id).classList.add("active");
 }
 
-function openQuran(){
-  show("quran");
-  render(surahs);
-}
-
-function back(){
-  show("home");
-}
-
-function backList(){
-  show("quran");
-}
-
-// ===== RENDER =====
+// ===== HOME =====
 function render(list){
   let box=document.getElementById("list");
   box.innerHTML="";
@@ -152,48 +165,77 @@ function render(list){
   });
 }
 
-// ===== SEARCH =====
-function search(){
+function searchSurah(){
   let v=document.getElementById("search").value;
-
   let f=surahs.filter(s=>s.name.includes(v));
   render(f);
 }
 
-// ===== SURAH =====
 function openSurah(s){
   current=s;
-  show("surahPage");
+  show("surah");
 
-  document.getElementById("title").innerText=
+  document.getElementById("surahTitle").innerText=
   s.number+" - "+s.name;
 
-  let ayahs=s.ayahs.map(a=>
+  let html=s.ayahs.map(a=>
     `<div class="ayah">${a.text}</div>`
   ).join("");
 
-  document.getElementById("ayahs").innerHTML=ayahs;
+  document.getElementById("ayahs").innerHTML=html;
 }
 
-// ===== AUDIO OFFLINE CACHE =====
-function play(){
-  let url=`https://cdn.islamic.network/quran/audio-surah/128/ar.alafasy/${current.number}.mp3`;
+// ===== TALAWE =====
+function openTalawe(){
+  show("talawe");
 
+  let url=`https://cdn.islamic.network/quran/audio-surah/128/ar.alafasy/${current.number}.mp3`;
   audio.src=url;
   audio.play();
 }
 
-function stop(){
-  audio.pause();
+function backSurah(){
+  show("surah");
 }
 
-</script>
-
-<!-- SERVICE WORKER -->
-<script>
-if('serviceWorker' in navigator){
-  navigator.serviceWorker.register('sw.js');
+function backHome(){
+  show("home");
 }
+
+// ===== MEMORIZE =====
+function openMemorize(){
+  show("mem");
+
+  let box=document.getElementById("numbers");
+  box.innerHTML="";
+
+  current.ayahs.forEach((a,i)=>{
+    let d=document.createElement("div");
+    d.className="number";
+    d.innerHTML="آية رقم " + (i+1);
+    box.appendChild(d);
+  });
+}
+
+// ===== SIMULATED RECITATION =====
+function startRecite(){
+  ayahIndex=0;
+
+  interval=setInterval(()=>{
+    if(ayahIndex<current.ayahs.length){
+      let items=document.querySelectorAll(".number");
+      items[ayahIndex].style.background="#bbdefb";
+      ayahIndex++;
+    }else{
+      clearInterval(interval);
+    }
+  },1500);
+}
+
+function stopRecite(){
+  clearInterval(interval);
+}
+
 </script>
 
 </body>
