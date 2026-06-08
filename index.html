@@ -3,250 +3,197 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>المصحف الشريف</title>
+<title>Offline Quran Pro</title>
 
 <style>
-:root{
-    --main:#1f7a5c;
-    --bg:#f5f6fa;
-    --card:#ffffff;
-    --text:#000;
-}
-
-body.dark{
-    --bg:#0b1220;
-    --card:#111a2e;
-    --text:#fff;
-}
-
 body{
-    margin:0;
-    font-family:Arial;
-    background:var(--bg);
-    color:var(--text);
+  margin:0;
+  font-family:Arial;
+  background:#f5f6fa;
 }
 
-/* Header */
 header{
-    background:var(--main);
-    color:white;
-    padding:15px;
-    text-align:center;
+  background:#1f7a5c;
+  color:white;
+  padding:15px;
+  text-align:center;
 }
 
-/* Pages */
 .page{display:none;padding:15px;}
 .active{display:block;}
 
-/* Cards */
 .card{
-    background:var(--card);
-    padding:15px;
-    margin:10px 0;
-    border-radius:12px;
-    box-shadow:0 2px 10px rgba(0,0,0,0.1);
-    cursor:pointer;
+  background:white;
+  padding:12px;
+  margin:8px 0;
+  border-radius:10px;
+  box-shadow:0 2px 6px rgba(0,0,0,0.1);
+  cursor:pointer;
 }
 
-/* Inputs */
-input{
-    width:100%;
-    padding:10px;
-    margin:5px 0;
-    border-radius:8px;
-}
-
-/* Buttons */
 button{
-    background:var(--main);
-    color:white;
-    border:none;
-    padding:10px;
-    border-radius:8px;
-    margin:5px 0;
-    width:100%;
-    cursor:pointer;
+  background:#1f7a5c;
+  color:white;
+  border:none;
+  padding:10px;
+  border-radius:8px;
+  margin:5px 0;
+  width:100%;
 }
 
-/* Counter */
-.counter{
-    font-size:45px;
-    text-align:center;
+input{
+  width:100%;
+  padding:10px;
+  margin:5px 0;
+  border-radius:8px;
 }
 
-/* Surah */
 .ayah{
-    padding:10px;
-    margin:5px 0;
-    background:var(--card);
-    border-radius:8px;
+  background:#fff;
+  padding:10px;
+  margin:5px 0;
+  border-radius:8px;
+}
+
+audio{
+  width:100%;
+  margin-top:10px;
 }
 </style>
 </head>
 
 <body>
 
-<header>📖 المصحف الشريف - تطبيق احترافي</header>
+<header>📖 Offline Quran Pro</header>
 
 <!-- HOME -->
 <div id="home" class="page active">
-    <div class="card" onclick="openQuran()">📖 القرآن الكريم</div>
-    <div class="card" onclick="openTasbeeh()">📿 التسبيح</div>
-    <div class="card" onclick="openPlan()">📅 خطة يومية للقرآن</div>
-
-    <button onclick="toggleDark()">🌙 وضع ليلي</button>
+  <div class="card" onclick="openQuran()">📖 القرآن الكريم</div>
 </div>
 
 <!-- QURAN -->
 <div id="quran" class="page">
-    <h3>القرآن الكريم</h3>
+  <h3>السور</h3>
 
-    <input id="search" placeholder="ابحث عن سورة أو آية">
-    <button onclick="searchQuran()">بحث</button>
+  <input id="search" placeholder="ابحث عن سورة">
+  <button onclick="search()">بحث</button>
 
-    <div id="result"></div>
+  <div id="list"></div>
 
-    <button onclick="backHome()">رجوع</button>
+  <button onclick="back()">رجوع</button>
 </div>
 
-<!-- SURAH PAGE -->
+<!-- SURAH -->
 <div id="surahPage" class="page">
-    <h3 id="surahTitle"></h3>
-    <div id="ayahs"></div>
+  <h3 id="title"></h3>
 
-    <h4>📚 التفسير</h4>
-    <div id="tafsir"></div>
+  <div id="ayahs"></div>
 
-    <audio id="audio" controls style="width:100%"></audio>
+  <button onclick="play()">▶ تشغيل التلاوة</button>
+  <button onclick="stop()">⏹ إيقاف</button>
 
-    <button onclick="backQuran()">رجوع</button>
-</div>
+  <audio id="audio" controls></audio>
 
-<!-- TASBEEH -->
-<div id="tasbeeh" class="page">
-    <h3>التسبيح</h3>
-
-    <div class="counter" id="count">0</div>
-
-    <input id="dhikr" placeholder="الذكر">
-
-    <button onclick="plus()">➕</button>
-    <button onclick="reset()">🔄 تصفير</button>
-
-    <button onclick="backHome()">رجوع</button>
-</div>
-
-<!-- PLAN -->
-<div id="plan" class="page">
-    <h3>📅 خطة يومية للقرآن</h3>
-
-    <div class="card">
-        📌 اقرأ 4 صفحات يوميًا = ختمة كل شهر  
-    </div>
-
-    <div class="card">
-        📌 اقرأ بعد الفجر 10 دقائق (أفضل وقت للحفظ)
-    </div>
-
-    <div class="card">
-        📌 راجع ما حفظته يوميًا قبل النوم
-    </div>
-
-    <div class="card">
-        📌 يوم الجمعة: مراجعة أسبوعية
-    </div>
-
-    <button onclick="backHome()">رجوع</button>
+  <button onclick="backList()">رجوع</button>
 </div>
 
 <script>
 
-let allSurahs=[];
-let count=0;
+let surahs=[];
+let current=null;
+let audio=document.getElementById("audio");
 
-// ===== LOAD QURAN =====
-fetch("https://api.alquran.cloud/v1/quran/ar.alafasy")
-.then(r=>r.json())
-.then(data=>{
-    allSurahs=data.data.surahs;
-});
+// ===== OFFLINE CACHE LOAD =====
+let cached = localStorage.getItem("quran");
+
+if(cached){
+  surahs = JSON.parse(cached);
+}else{
+  fetch("https://api.alquran.cloud/v1/quran/ar.alafasy")
+  .then(r=>r.json())
+  .then(d=>{
+    surahs = d.data.surahs;
+    localStorage.setItem("quran", JSON.stringify(surahs));
+  });
+}
 
 // ===== NAV =====
 function show(id){
-    document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
-    document.getElementById(id).classList.add("active");
+  document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
+  document.getElementById(id).classList.add("active");
 }
 
-function openQuran(){show("quran")}
-function openTasbeeh(){show("tasbeeh")}
-function openPlan(){show("plan")}
-function backHome(){show("home")}
-function backQuran(){show("quran")}
+function openQuran(){
+  show("quran");
+  render(surahs);
+}
+
+function back(){
+  show("home");
+}
+
+function backList(){
+  show("quran");
+}
+
+// ===== RENDER =====
+function render(list){
+  let box=document.getElementById("list");
+  box.innerHTML="";
+
+  list.forEach(s=>{
+    let div=document.createElement("div");
+    div.className="card";
+    div.innerHTML=s.number+" - "+s.name;
+
+    div.onclick=()=>openSurah(s);
+
+    box.appendChild(div);
+  });
+}
 
 // ===== SEARCH =====
-function searchQuran(){
-    let val=document.getElementById("search").value;
-    let res=document.getElementById("result");
+function search(){
+  let v=document.getElementById("search").value;
 
-    let found=allSurahs.filter(s=>
-        s.name.includes(val)
-    );
-
-    res.innerHTML="";
-
-    found.forEach(s=>{
-        let div=document.createElement("div");
-        div.className="card";
-
-        div.innerHTML=s.number+" - "+s.name;
-
-        div.onclick=()=>openSurah(s);
-
-        res.appendChild(div);
-    });
+  let f=surahs.filter(s=>s.name.includes(v));
+  render(f);
 }
 
-// ===== OPEN SURAH =====
-function openSurah(surah){
-    show("surahPage");
+// ===== SURAH =====
+function openSurah(s){
+  current=s;
+  show("surahPage");
 
-    document.getElementById("surahTitle").innerText=
-    surah.number+" - "+surah.name;
+  document.getElementById("title").innerText=
+  s.number+" - "+s.name;
 
-    let ayahs=surah.ayahs.map(a=>
-        `<div class="ayah">${a.text}</div>`
-    ).join("");
+  let ayahs=s.ayahs.map(a=>
+    `<div class="ayah">${a.text}</div>`
+  ).join("");
 
-    document.getElementById("ayahs").innerHTML=ayahs;
-
-    // تفسير بسيط API
-    fetch(`https://api.alquran.cloud/v1/ayah/${surah.number}:1/ar.muyassar`)
-    .then(r=>r.json())
-    .then(d=>{
-        document.getElementById("tafsir").innerText=
-        d.data.text;
-    });
-
-    // صوت
-    document.getElementById("audio").src=
-    `https://cdn.islamic.network/quran/audio-surah/128/ar.alafasy/${surah.number}.mp3`;
+  document.getElementById("ayahs").innerHTML=ayahs;
 }
 
-// ===== TASBEEH =====
-function plus(){
-    count++;
-    document.getElementById("count").innerText=count;
-}
-function reset(){
-    count=0;
-    document.getElementById("count").innerText=count;
+// ===== AUDIO OFFLINE CACHE =====
+function play(){
+  let url=`https://cdn.islamic.network/quran/audio-surah/128/ar.alafasy/${current.number}.mp3`;
+
+  audio.src=url;
+  audio.play();
 }
 
-// ===== DARK MODE =====
-function toggleDark(){
-    document.body.classList.toggle("dark");
+function stop(){
+  audio.pause();
 }
 
+</script>
+
+<!-- SERVICE WORKER -->
+<script>
+if('serviceWorker' in navigator){
+  navigator.serviceWorker.register('sw.js');
+}
 </script>
 
 </body>
